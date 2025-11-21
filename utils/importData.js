@@ -5,15 +5,18 @@ const bcrypt = require('bcryptjs');
 const { Empresa, Usuario, Atividade } = require('../db');
 
 const importInitialData = async () => {
-    // Import Usuarios
+    // ---------------------------------------------------------
+    // 1. Importar Usuários
+    // ---------------------------------------------------------
     const usuariosFilePath = path.join(__dirname, '../assets/arquivos_CSV/usuario.csv');
     const usuariosData = [];
+
     await new Promise((resolve, reject) => {
         fs.createReadStream(usuariosFilePath)
             .pipe(parse({
                 columns: true,
                 skip_empty_lines: true,
-                delimiter: ',' // Specify semicolon as delimiter
+                delimiter: ',' // Correção: O CSV usa vírgula
             }))
             .on('data', (data) => usuariosData.push(data))
             .on('end', async () => {
@@ -21,13 +24,14 @@ const importInitialData = async () => {
                 for (const userData of usuariosData) {
                     try {
                         await Usuario.create({
-                            id: userData.id_usuario, // Ensure ID is mapped correctly
+                            // Mapeamento corrigido conforme o cabeçalho do CSV (id, nome, email, imagem...)
+                            id: userData.id, 
                             nome: userData.nome,
                             email: userData.email,
-                            senha: userData.senha, // Password will be hashed by the model's beforeCreate hook
-                            foto: userData.foto_perfil,
-                            tipo: 'user', // Default type
-                        }, { ignoreDuplicates: true }); // Ignore if user with same ID already exists
+                            senha: userData.senha, 
+                            foto: userData.imagem, // CSV usa 'imagem', Modelo usa 'foto'
+                            tipo: 'user',
+                        }, { ignoreDuplicates: true });
                     } catch (error) {
                         if (error.name === 'SequelizeUniqueConstraintError') {
                             console.warn(`Usuário com email ${userData.email} já existe. Ignorando.`);
@@ -42,7 +46,9 @@ const importInitialData = async () => {
             .on('error', reject);
     });
 
-    // Import Atividades
+    // ---------------------------------------------------------
+    // 2. Importar Atividades
+    // ---------------------------------------------------------
     const atividadesFilePath = path.join(__dirname, '../assets/arquivos_CSV/atividade.csv');
     const atividadesData = [];
     let totalCaloriasEmpresa = 0;
@@ -53,37 +59,42 @@ const importInitialData = async () => {
             .pipe(parse({
                 columns: true,
                 skip_empty_lines: true,
-                delimiter: ';' // Specify semicolon as delimiter
+                delimiter: ',' // Correção: Mudado de ';' para ',' para corresponder ao arquivo
             }))
             .on('data', (data) => atividadesData.push(data))
             .on('end', async () => {
                 console.log('CSV de atividades lido. Importando...');
                 for (const atividadeData of atividadesData) {
                     try {
-                        const usuario = await Usuario.findByPk(atividadeData.id_usuario);
+                        // O CSV usa 'usuario_id', não 'id_usuario'
+                        const usuarioId = atividadeData.usuario_id;
+                        const usuario = await Usuario.findByPk(usuarioId);
+
                         if (!usuario) {
-                            console.warn(`Usuário com ID ${atividadeData.id_usuario} não encontrado para atividade ${atividadeData.titulo}. Ignorando atividade.`);
+                            console.warn(`Usuário com ID ${usuarioId} não encontrado para a atividade. Ignorando.`);
                             continue;
                         }
 
-                        const atividade = await Atividade.create({
-                            id: atividadeData.id_atividade,
+                        // Mapeamento corrigido conforme cabeçalhos do CSV
+                        const novaAtividade = await Atividade.create({
+                            id: atividadeData.id, // CSV usa 'id'
                             tipo: atividadeData.tipo_atividade,
-                            titulo: atividadeData.titulo,
-                            distanciaMetros: parseFloat(atividadeData.distancia),
-                            duracaoMinutos: parseFloat(atividadeData.duracao),
-                            calorias: parseFloat(atividadeData.calorias),
-                            dataCriacao: new Date(atividadeData.data_criacao),
+                            titulo: atividadeData.tipo_atividade, // CSV não tem titulo, usamos o tipo
+                            distanciaMetros: parseFloat(atividadeData.distancia_percorrida), // CSV usa 'distancia_percorrida'
+                            duracaoMinutos: parseFloat(atividadeData.duracao_atividade),     // CSV usa 'duracao_atividade'
+                            calorias: parseFloat(atividadeData.quantidade_calorias),         // CSV usa 'quantidade_calorias'
+                            dataCriacao: new Date(atividadeData.createdAt), // CSV usa 'createdAt'
                             UsuarioId: usuario.id,
                         });
 
-                        // Update user's total activities and calories
+                        // Atualizar métricas do usuário
                         usuario.totalAtividades = (usuario.totalAtividades || 0) + 1;
-                        usuario.totalCalorias = (usuario.totalCalorias || 0) + atividade.calorias;
+                        usuario.totalCalorias = (usuario.totalCalorias || 0) + novaAtividade.calorias;
                         await usuario.save();
 
+                        // Métricas da empresa
                         totalAtividadesEmpresa++;
-                        totalCaloriasEmpresa += atividade.calorias;
+                        totalCaloriasEmpresa += novaAtividade.calorias;
 
                     } catch (error) {
                         console.error('Erro ao importar atividade:', atividadeData, error.message);
@@ -95,7 +106,9 @@ const importInitialData = async () => {
             .on('error', reject);
     });
 
-    // Create or update Empresa metrics
+    // ---------------------------------------------------------
+    // 3. Atualizar Métricas da Empresa
+    // ---------------------------------------------------------
     let empresa = await Empresa.findOne();
     if (!empresa) {
         empresa = await Empresa.create({
@@ -105,6 +118,8 @@ const importInitialData = async () => {
             totalCalorias: totalCaloriasEmpresa,
         });
     } else {
+        // Se já existir, somamos aos valores existentes ou redefinimos
+        // Como é importação inicial, vamos assumir que queremos atualizar os totais
         empresa.totalAtividades = totalAtividadesEmpresa;
         empresa.totalCalorias = totalCaloriasEmpresa;
         await empresa.save();

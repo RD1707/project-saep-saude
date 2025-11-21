@@ -32,7 +32,6 @@ const profileName = document.getElementById('profile-name');
 const metricActivities = document.getElementById('metric-activities-count');
 const metricCalories = document.getElementById('metric-calories-count');
 const btnSidebarAtividades = document.getElementById('btn-sidebar-atividades');
-const userList = document.getElementById('user-list'); // New: Reference to the user list UL
 
 // Header e Auth
 const btnLogin = document.getElementById('btn-login');
@@ -64,9 +63,6 @@ async function init() {
     
     // Configura estado inicial da UI baseada na autenticação
     updateAuthUI();
-
-    // Carrega a lista de usuários para a sidebar
-    await fetchAndRenderUsers();
 
     // Carrega atividades iniciais
     await fetchActivities();
@@ -209,33 +205,7 @@ async function fetchCompanyMetrics() {
 }
 
 /* =========================================
-   6. Funções de Usuários
-   ========================================= */
-async function fetchAndRenderUsers() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/general/users`);
-        if (response.ok) {
-            const users = await response.json();
-            userList.innerHTML = ''; // Clear previous list
-            users.forEach(user => {
-                const li = document.createElement('li');
-                li.className = 'user-item';
-                const userImgPath = user.foto ? `assets/imagens_perfil/${user.foto}` : 'assets/logo_saepsaude/SAEPSaude.png';
-                li.innerHTML = `
-                    <img src="${userImgPath}" alt="${user.nome}" class="user-item-img">
-                    <span class="user-item-name">${user.nome}</span>
-                `;
-                userList.appendChild(li);
-            });
-        }
-    } catch (error) {
-        console.error('Não foi possível buscar a lista de usuários.', error);
-        userList.innerHTML = '<li style="padding:10px; color:#888;">Erro ao carregar usuários.</li>';
-    }
-}
-
-/* =========================================
-   7. Atividades (Listagem e Renderização)
+   6. Atividades (Listagem e Renderização)
    ========================================= */
 async function fetchActivities(page = STATE.currentPage) {
     const limit = STATE.itemsPerPage;
