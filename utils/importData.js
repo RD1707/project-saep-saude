@@ -13,7 +13,7 @@ const importInitialData = async () => {
             .pipe(parse({
                 columns: true,
                 skip_empty_lines: true,
-                delimiter: ';' // Specify semicolon as delimiter
+                delimiter: ',' // Specify semicolon as delimiter
             }))
             .on('data', (data) => usuariosData.push(data))
             .on('end', async () => {
@@ -100,7 +100,7 @@ const importInitialData = async () => {
     if (!empresa) {
         empresa = await Empresa.create({
             nome: 'SAEPSaude',
-            logo: '/assets/logo_saepsaude/SAEPSaude.png',
+            logo: 'SAEPSaude.png',
             totalAtividades: totalAtividadesEmpresa,
             totalCalorias: totalCaloriasEmpresa,
         });

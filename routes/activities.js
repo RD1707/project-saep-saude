@@ -38,10 +38,27 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // List Activities with pagination and filters
-router.get('/', authenticateToken, async (req, res) => {
+const jwt = require('jsonwebtoken'); // Adicione esta linha no topo se não houver
+
+// List Activities with pagination and filters (MODIFICADO PARA SER PÚBLICO)
+router.get('/', async (req, res) => { // Removemos 'authenticateToken' daqui
     const { page = 1, limit = 10, tipo } = req.query;
     const offset = (page - 1) * limit;
-    const userId = req.user.id;
+    
+    // Lógica para verificar usuário opcional (para ver os Likes)
+    let userId = null;
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            userId = decoded.id;
+        } catch (err) {
+            // Se o token for inválido, apenas seguimos como usuário deslogado
+            userId = null;
+        }
+    }
 
     const whereClause = {};
     if (tipo) {
@@ -63,12 +80,17 @@ router.get('/', authenticateToken, async (req, res) => {
         });
 
         const atividadesComLikes = await Promise.all(rows.map(async (atividade) => {
-            const hasLiked = await Like.count({
-                where: {
-                    UsuarioId: userId,
-                    AtividadeId: atividade.id,
-                },
-            }) > 0;
+            let hasLiked = false;
+
+            // Só verificamos se curtiu se tivermos um userId logado
+            if (userId) {
+                hasLiked = await Like.count({
+                    where: {
+                        UsuarioId: userId,
+                        AtividadeId: atividade.id,
+                    },
+                }) > 0;
+            }
 
             return {
                 ...atividade.toJSON(),

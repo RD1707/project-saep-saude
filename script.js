@@ -1,7 +1,7 @@
 /* =========================================
    1. Configurações e Estado Global
    ========================================= */
-const API_BASE_URL = ''; // Vazio pois estamos na mesma origem (ex: localhost:3000)
+const API_BASE_URL = 'http://localhost:3000'; // Vazio pois estamos na mesma origem (ex: localhost:3000)
 // Se a API rodar em porta diferente, use: 'http://localhost:3000'
 
 const STATE = {
@@ -12,7 +12,9 @@ const STATE = {
     currentFilter: '', // '' (todas), 'corrida', 'caminhada', 'trilha'
     companyMetrics: {
         totalAtividades: 0,
-        totalCalorias: 0
+        totalCalorias: 0,
+        companyName: 'SAEPSaúde', // Default
+        companyLogo: 'assets/logo_saepsaude/SAEPSaude.png' // Default
     }
 };
 
@@ -30,6 +32,7 @@ const profileName = document.getElementById('profile-name');
 const metricActivities = document.getElementById('metric-activities-count');
 const metricCalories = document.getElementById('metric-calories-count');
 const btnSidebarAtividades = document.getElementById('btn-sidebar-atividades');
+const userList = document.getElementById('user-list'); // New: Reference to the user list UL
 
 // Header e Auth
 const btnLogin = document.getElementById('btn-login');
@@ -54,13 +57,16 @@ const formCreateActivity = document.getElementById('form-create-activity');
    3. Inicialização
    ========================================= */
 async function init() {
-    // Configura estado inicial da UI baseada na autenticação
-    updateAuthUI();
-
     // Carrega métricas da empresa (simulado ou via endpoint se existir)
     // O enunciado pede para carregar da API. Vamos tentar buscar de um endpoint '/empresa'
     // Caso não exista, o catch lida com isso.
-    fetchCompanyMetrics();
+    await fetchCompanyMetrics(); // Await this to ensure metrics are loaded before UI update
+    
+    // Configura estado inicial da UI baseada na autenticação
+    updateAuthUI();
+
+    // Carrega a lista de usuários para a sidebar
+    await fetchAndRenderUsers();
 
     // Carrega atividades iniciais
     await fetchActivities();
@@ -97,8 +103,8 @@ function updateAuthUI() {
         btnLogout.classList.add('hidden');
 
         // Reseta Sidebar para dados da Empresa (padrão)
-        profileImg.src = 'assets/logo_saepsaude/SAEPSaude.png';
-        profileName.textContent = 'SAEPSaúde';
+        profileImg.src = STATE.companyMetrics.companyLogo;
+        profileName.textContent = STATE.companyMetrics.companyName;
         
         // Mostra métricas da empresa
         metricActivities.textContent = STATE.companyMetrics.totalAtividades;
@@ -185,29 +191,51 @@ function handleLogout() {
    5. Métricas e Dados da Empresa
    ========================================= */
 async function fetchCompanyMetrics() {
-    // Tenta buscar métricas da empresa.
-    // Como não há rota explicita nos arquivos, tentaremos '/empresa' 
-    // Se falhar, mantém 0 ou usa lógica alternativa se necessário.
     try {
-        // Nota: Assumindo que o backend implementou uma rota GET /empresa ou similar
-        // Se não existir, este fetch falhará. 
-        // Para fins de teste "Mock", se falhar, não atualizamos.
-        const response = await fetch(`${API_BASE_URL}/empresa`); // Endpoint hipotético baseado no requisito
+        const response = await fetch(`${API_BASE_URL}/general/company-metrics`);
         if (response.ok) {
             const data = await response.json();
             STATE.companyMetrics.totalAtividades = data.totalAtividades;
             STATE.companyMetrics.totalCalorias = data.totalCalorias;
+            STATE.companyMetrics.companyName = data.nome;
+            STATE.companyMetrics.companyLogo = data.logo ? `assets/logo_saepsaude/${data.logo}` : 'assets/logo_saepsaude/SAEPSaude.png';
             
-            // Atualiza a UI se não estiver logado (pois mostra dados da empresa)
-            if (!STATE.token) updateAuthUI();
+            // updateAuthUI() is called after fetchCompanyMetrics in init()
+            // so, no need to call it here.
         }
     } catch (error) {
-        console.warn('Não foi possível buscar métricas da empresa.');
+        console.error('Não foi possível buscar métricas da empresa.', error);
     }
 }
 
 /* =========================================
-   6. Atividades (Listagem e Renderização)
+   6. Funções de Usuários
+   ========================================= */
+async function fetchAndRenderUsers() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/general/users`);
+        if (response.ok) {
+            const users = await response.json();
+            userList.innerHTML = ''; // Clear previous list
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+                const userImgPath = user.foto ? `assets/imagens_perfil/${user.foto}` : 'assets/logo_saepsaude/SAEPSaude.png';
+                li.innerHTML = `
+                    <img src="${userImgPath}" alt="${user.nome}" class="user-item-img">
+                    <span class="user-item-name">${user.nome}</span>
+                `;
+                userList.appendChild(li);
+            });
+        }
+    } catch (error) {
+        console.error('Não foi possível buscar a lista de usuários.', error);
+        userList.innerHTML = '<li style="padding:10px; color:#888;">Erro ao carregar usuários.</li>';
+    }
+}
+
+/* =========================================
+   7. Atividades (Listagem e Renderização)
    ========================================= */
 async function fetchActivities(page = STATE.currentPage) {
     const limit = STATE.itemsPerPage;

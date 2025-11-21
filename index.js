@@ -1,9 +1,10 @@
 require('dotenv').config();
 const express = require('express');
-const { sequelize, syncDatabase } = require('./db');
+const { sequelize, syncDatabase, Empresa } = require('./db');
 const authRoutes = require('./routes/auth');
 const activityRoutes = require('./routes/activities');
 const commentRoutes = require('./routes/comments');
+const generalRoutes = require('./routes/general'); // Require new general routes
 const { importInitialData } = require('./utils/importData'); // We will create this later
 
 const app = express();
@@ -17,10 +18,7 @@ app.use(express.static(__dirname)); // Serve static files from the current direc
 app.use('/auth', authRoutes);
 app.use('/activities', activityRoutes);
 app.use('/activities', commentRoutes); // Comments are nested under activities
-
-app.get('/', (req, res) => {
-    res.send('API is running...');
-});
+app.use('/general', generalRoutes); // Use new general routes
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -44,6 +42,8 @@ const startServer = async () => {
         } else {
             console.log('Database already contains data, skipping import.');
         }
+
+        
 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
