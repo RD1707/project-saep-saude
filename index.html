@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAEP Saúde</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="profile-image-container">
+                    <img id="profile-img" src="assets/logo_saepsaude/SAEPSaude.png" alt="Perfil">
+                </div>
+                
+                <h2 id="profile-name">SAEPSaúde</h2>
+
+                <div class="metrics-container">
+                    <div class="metric-item">
+                        <span id="metric-activities-count" class="metric-value">0</span>
+                        <span class="metric-label">Qtd. Atividades</span>
+                    </div>
+                    <div class="metric-item">
+                        <span id="metric-calories-count" class="metric-value">0</span>
+                        <span class="metric-label">Qtd. Calorias</span>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <button id="btn-sidebar-atividades" class="nav-btn" disabled aria-disabled="true">
+                        <span class="icon-chart"></span> Atividade
+                    </button>
+                </nav>
+            </div>
+
+            <footer class="sidebar-footer">
+                <h3>SAEPSaúde</h3>
+                <div class="social-icons">
+                    <img src="assets/icones/instagram.svg" alt="Instagram">
+                    <img src="assets/icones/twitter.svg" alt="Twitter">
+                    <img src="assets/icones/tiktok.svg" alt="TikTok">
+                </div>
+                <p>Copyright - 2025/2026</p>
+            </footer>
+        </aside>
+
+        <main class="main-content">
+            
+            <header class="main-header">
+                <div class="header-actions">
+                    <button id="btn-login" class="btn-auth">Login</button>
+                    <button id="btn-logout" class="btn-auth hidden">Logout</button>
+                </div>
+            </header>
+
+            <div class="filters-bar">
+                <button class="filter-btn active" data-type="">Todas</button>
+                <button class="filter-btn" data-type="corrida">Corrida</button>
+                <button class="filter-btn" data-type="caminhada">Caminhada</button>
+                <button class="filter-btn" data-type="trilha">Trilha</button>
+            </div>
+
+            <div id="content-area">
+                
+                <div id="view-feed" class="view-section active">
+                    <div id="activities-list" class="activities-grid">
+                        </div>
+
+                    <div class="pagination-container">
+                        <button id="page-prev" class="page-nav">Anterior</button>
+                        <div id="page-numbers" class="page-numbers">
+                            </div>
+                        <button id="page-next" class="page-nav">Próximo</button>
+                        
+                        <select id="items-per-page" class="items-select">
+                            <option value="4">4 por página</option>
+                            <option value="8">8 por página</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="view-create" class="view-section hidden">
+                    <div class="create-form-container">
+                        <h2>Crie sua atividade</h2>
+                        <form id="form-create-activity">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="activity-type">Tipo da atividade</label>
+                                    <select id="activity-type" name="tipo">
+                                        <option value="" disabled selected>Ex: Caminhada</option>
+                                        <option value="caminhada">Caminhada</option>
+                                        <option value="corrida">Corrida</option>
+                                        <option value="trilha">Trilha</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="activity-distance">Distância percorrida</label>
+                                    <input type="number" id="activity-distance" name="distanciaMetros" placeholder="Ex: 1000 metros">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="activity-duration">Duração da atividade</label>
+                                    <input type="number" id="activity-duration" name="duracaoMinutos" placeholder="Ex: 120 min">
+                                </div>
+                                <div class="form-group">
+                                    <label for="activity-calories">Quantidade de Calorias</label>
+                                    <input type="number" id="activity-calories" name="calorias" placeholder="Ex: 300">
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-submit-activity">Criar Atividade</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="recent-activities-title">
+                        <h3>Suas Atividades Recentes</h3>
+                    </div>
+                    </div>
+
+            </div>
+        </main>
+    </div>
+
+    <div id="modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <h2>Login</h2>
+                <button id="btn-close-modal" class="btn-icon-close">
+                    <img src="assets/icones/x.svg" alt="Fechar">
+                </button>
+            </div>
+            
+            <form id="form-login">
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" name="email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Senha</label>
+                    <input type="password" id="login-password" name="senha">
+                </div>
+
+                <div id="login-error-msg" class="error-text hidden"></div>
+
+                <div class="modal-actions">
+                    <button type="button" id="btn-cancel-login" class="btn-cancel">Cancelar</button>
+                    <button type="submit" class="btn-confirm">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

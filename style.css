@@ -1,0 +1,625 @@
+/* =========================================
+   1. Reset e Estilos Globais
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #FFFFFF;
+    color: #000000;
+    height: 100vh;
+    overflow: hidden; /* Evita scroll na janela principal, scroll apenas no main se necessário */
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+input, select {
+    font-family: 'Inter', sans-serif;
+    outline: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================
+   2. Layout Principal (App Container)
+   ========================================= */
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* =========================================
+   3. Sidebar (Coluna Esquerda)
+   ========================================= */
+.sidebar {
+    width: 300px;
+    background-color: #333333; /* */
+    color: #FFFFFF; /* */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Ancora footer no final */
+    padding: 20px;
+    flex-shrink: 0; /* Impede que a sidebar encolha */
+}
+
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.profile-image-container {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 15px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Métricas */
+.metrics-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+.metric-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.metric-value {
+    font-size: 1.8rem;
+    font-weight: 400;
+}
+
+.metric-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+/* Navegação Sidebar */
+.sidebar-nav {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.nav-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: transparent;
+    color: #FFFFFF;
+    text-align: left;
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    border-left: 4px solid transparent;
+}
+
+.nav-btn.active {
+    background-color: #483DAD; /* - Estado ativo */
+    color: #FFFFFF;
+}
+
+.nav-btn:disabled {
+    color: #888;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Footer Sidebar */
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 20px;
+    text-align: center;
+}
+
+.sidebar-footer h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.social-icons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.social-icons img {
+    width: 24px;
+    height: 24px;
+    filter: invert(1); /* Garante que ícones pretos fiquem brancos */
+}
+
+.sidebar-footer p {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+/* =========================================
+   4. Main Content (Coluna Direita)
+   ========================================= */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #FFFFFF;
+    overflow-y: auto; /* Scroll vertical apenas aqui */
+}
+
+/* Header */
+.main-header {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.btn-auth {
+    padding: 8px 24px;
+    font-size: 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    border: 1px solid #333;
+}
+
+/* Botão Login (Não logado): Branco com texto escuro */
+#btn-login {
+    background-color: #FFFFFF;
+    color: #333333;
+}
+
+/* Botão Logout (Logado): Escuro com texto branco */
+#btn-logout {
+    background-color: #333333;
+    color: #FFFFFF;
+}
+
+/* Barra de Filtros */
+.filters-bar {
+    background-color: #333333; /* */
+    padding: 10px 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.filter-btn {
+    background: transparent;
+    color: #FFFFFF;
+    font-size: 1rem;
+    padding: 5px 15px;
+    border-bottom: 2px solid transparent;
+    opacity: 0.7;
+}
+
+.filter-btn.active, .filter-btn:hover {
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Área de Conteúdo */
+#content-area {
+    padding: 20px 40px;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* =========================================
+   5. Lista de Atividades (Cards)
+   ========================================= */
+.activity-card {
+    border: 1px solid #E0E0E0;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #FAFAFA;
+}
+
+/* Cabeçalho do Card */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info img {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px; /* Quadrado arredondado conforme imagem */
+    object-fit: cover;
+}
+
+.user-name {
+    font-weight: 500;
+    font-size: 1.1rem;
+}
+
+.activity-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 700;
+    font-size: 1.2rem;
+    text-transform: capitalize; /* Corrida, Caminhada... */
+}
+
+.activity-date {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Estatísticas do Card */
+.card-stats {
+    display: flex;
+    justify-content: space-between; /* Espalha uniformemente */
+    padding: 15px 10%; /* Padding lateral para não colar na borda */
+    margin-bottom: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+/* Rodapé do Card (Interações) */
+.card-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    align-items: center;
+}
+
+.action-btn {
+    background: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.icon-svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s;
+}
+
+.action-btn:hover .icon-svg {
+    transform: scale(1.1);
+}
+
+/* Coração Vermelho ao curtir */
+.liked-icon {
+    filter: invert(16%) sepia(96%) saturate(7464%) hue-rotate(358deg) brightness(95%) contrast(114%); /* Filtro aproximado para vermelho #FF0000 em SVG preto, ou troca o src via JS */
+}
+
+/* Seção de Comentários (Toggle) */
+.comments-section {
+    margin-top: 15px;
+    border-top: 1px solid #EEE;
+    padding-top: 10px;
+    animation: fadeIn 0.3s ease;
+}
+
+.comment-input-wrapper {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.comment-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.btn-send-comment {
+    background-color: #333;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-send-comment img {
+    width: 20px;
+    filter: invert(1); /* Ícone branco */
+}
+
+.comments-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.comment-item {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    padding: 8px;
+    background: #F1F1F1;
+    border-radius: 4px;
+}
+
+.comment-user {
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+/* Paginação */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 30px;
+    margin-bottom: 50px;
+}
+
+.page-nav, .page-num {
+    padding: 8px 12px;
+    border: 1px solid #DDD;
+    background-color: #FFF;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.page-num.active {
+    background-color: #483DAD; /* */
+    color: #FFFFFF;
+    border-color: #483DAD;
+}
+
+.items-select {
+    margin-left: 20px;
+    padding: 5px;
+    border: 1px solid #DDD;
+}
+
+/* =========================================
+   6. Formulário de Criação
+   ========================================= */
+.create-form-container {
+    border: 1px solid #CCC;
+    padding: 20px;
+    border-radius: 5px;
+    background: #FFF;
+    margin-bottom: 30px;
+}
+
+.create-form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.4rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input, .form-group select {
+    padding: 10px;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* Estado de Erro nos Inputs */
+.input-error {
+    border: 1px solid #FF0000 !important; /* */
+}
+
+.btn-submit-activity {
+    background-color: #333333;
+    color: #FFFFFF;
+    padding: 12px 20px;
+    width: auto;
+    margin-left: auto; /* Alinha à direita */
+    display: block;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.recent-activities-title {
+    text-align: center;
+    margin: 30px 0 20px 0;
+    border-top: 2px solid #333;
+    padding-top: 10px;
+}
+
+/* =========================================
+   7. Modal de Login
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #FFF;
+    width: 400px;
+    padding: 30px;
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #EEE;
+    padding-bottom: 10px;
+}
+
+.btn-icon-close {
+    background: transparent;
+    padding: 5px;
+}
+
+.error-text {
+    color: #FF0000;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    background: transparent;
+    color: #333;
+    border: 1px solid #333; /* */
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+.btn-confirm {
+    background-color: #333333; /* */
+    color: #FFFFFF;
+    padding: 8px 20px;
+    border-radius: 4px;
+}
+
+/* =========================================
+   8. Responsividade
+   ========================================= */
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column; /* Perfil em cima, Main embaixo */
+        height: auto; /* Permite scroll na página toda */
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding-bottom: 20px;
+    }
+    
+    /* Oculta footer da sidebar em mobile para economizar espaço se desejar, 
+       mas o requisito diz manter todas as funcionalidades */
+    .sidebar-footer {
+        display: none; 
+    }
+
+    .main-content {
+        overflow: visible;
+    }
+
+    /* Ajuste do card para telas pequenas */
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .activity-title {
+        position: static; /* Remove centralização absoluta */
+        transform: none;
+        margin: 5px 0;
+    }
+
+    .card-stats {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
